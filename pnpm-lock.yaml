@@ -8,6 +8,9 @@ dependencies:
   '@heroui/react':
     specifier: 2.7.8
     version: 2.7.8(@types/react@18.3.21)(framer-motion@11.18.2)(react-dom@18.3.1)(react@18.3.1)(tailwindcss@3.4.17)
+  '@hono/trpc-server':
+    specifier: ^0.3.4
+    version: 0.3.4(@trpc/server@11.1.2)(hono@4.7.9)
   '@trpc/client':
     specifier: ^11.1.2
     version: 11.1.2(@trpc/server@11.1.2)(typescript@5.8.3)
@@ -2252,6 +2255,17 @@ packages:
     dependencies:
       hono: 4.7.9
     dev: true
+
+  /@hono/trpc-server@0.3.4(@trpc/server@11.1.2)(hono@4.7.9):
+    resolution: {integrity: sha512-xFOPjUPnII70FgicDzOJy1ufIoBTu8eF578zGiDOrYOrYN8CJe140s9buzuPkX+SwJRYK8LjEBHywqZtxdm8aA==}
+    engines: {node: '>=16.0.0'}
+    peerDependencies:
+      '@trpc/server': ^10.10.0 || >11.0.0-rc
+      hono: '>=4.*'
+    dependencies:
+      '@trpc/server': 11.1.2(typescript@5.8.3)
+      hono: 4.7.9
+    dev: false
 
   /@humanwhocodes/config-array@0.13.0:
     resolution: {integrity: sha512-DZLEEqFWQFiyK6h5YIeynKx7JlvCYWL0cImfSRXZ9l4Sg2efkFGTuFf6vzXjK1cq6IYkU+Eg/JizXw+TD2vRNw==}

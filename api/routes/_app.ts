@@ -36,7 +36,7 @@ const employeeSchema = z.object({
 });
 
 // 创建员工路由
-export const employeeRouter = router({
+export const appRouter = router({
     // 获取员工信息
     getEmployee: publicProcedure
         .query(() => {
@@ -65,3 +65,4 @@ export const employeeRouter = router({
             }
         }),
 });
+export type AppRouter = typeof appRouter;

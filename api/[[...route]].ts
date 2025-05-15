@@ -1,7 +1,8 @@
 import { Hono } from "hono";
 import { logger } from "hono/logger";
 import { handle } from "hono/vercel";
-import { createEmployeeAdapter, createTRPCAdapter } from "./routes/trpcAdapter";
+import { appRouter } from "./routes/_app";
+import { trpcServer } from "@hono/trpc-server";
 
 export const config = {
   runtime: "edge",
@@ -12,18 +13,13 @@ const app = new Hono();
 
 app.use("*", logger());
 
-// 创建tRPC路由
-const trpcApp = createTRPCAdapter();
-// 创建兼容原有API路径的适配器
-const employeeApp = createEmployeeAdapter();
-
-const apiRoutes = app.basePath("/api")
-  .route("/employee", employeeApp)
-  .route("/trpc", trpcApp);
+app.use("/trpc/*", trpcServer({
+    router: appRouter,
+})
+)
 
 app.all("*", (c) => c.text("404: Not Found"));
 
 export const GET = handle(app);
 export const PUT = handle(app);
 export default app;
-export type ApiRoutes = typeof apiRoutes;
