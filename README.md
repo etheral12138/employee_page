@@ -8,6 +8,7 @@
 - **TypeScript**: JavaScript 的超集，提供类型检查
 - **Vite**: 现代前端构建工具，提供极速的开发体验
 - **Hono**: 轻量级、高性能的 Web 框架，适用于边缘计算环境
+- **tRPC**: 端到端类型安全的 API 开发框架，无需手动定义 API 类型
 - **ahooks**: 实用的 React Hooks 库，提供丰富的自定义 hooks
 - **HeroUI**: 美观且可定制的 UI 组件库
 - **Tailwind CSS**: 实用优先的 CSS 框架
@@ -41,6 +42,13 @@
 ```
 employee_page/
 ├── api/                  # Hono 服务端路由
+│   ├── [[...route]].ts   # API 路由入口
+│   ├── data/             # 数据存储
+│   └── routes/           # API 路由定义
+│       ├── employee.ts   # 员工 API 路由
+│       ├── employeeRouter.ts # tRPC 员工路由
+│       ├── trpc.ts       # tRPC 初始化
+│       └── trpcAdapter.ts # tRPC 适配器
 ├── public/               # 静态资源
 ├── src/
 │   ├── components/       # 共享组件
@@ -81,7 +89,39 @@ vercel
 
 - 前后端一体化开发体验
 - 基于 Hono 的高性能 API
+- 使用 tRPC 实现端到端类型安全的 API
 - 使用 ahooks 简化状态管理和异步操作
 - 响应式设计，适配各种设备
 - TypeScript 支持，提供类型安全
 - 开箱即用的 UI 组件库
+
+## tRPC 集成
+
+本项目集成了 tRPC，提供了端到端类型安全的 API 开发体验：
+
+- **类型安全**: 前端和后端共享相同的类型定义，无需手动维护 API 类型
+- **自动补全**: 在前端调用 API 时享受完整的类型提示和自动补全
+- **运行时验证**: 使用 Zod 进行请求和响应数据的验证
+- **兼容性**: 通过适配器同时支持传统 REST API 和 tRPC 调用
+
+### tRPC 使用示例
+
+```typescript
+// 前端调用示例
+import { createTRPCClient, httpBatchLink } from '@trpc/client';
+import type { AppRouter } from '@api/routes/trpcAdapter';
+
+// 创建 tRPC 客户端
+const trpc = createTRPCClient<AppRouter>({
+    links: [
+        httpBatchLink({
+            url: '/api/trpc',
+        }),
+    ],
+});
+
+// 获取员工信息 - 享受完整的类型安全和自动补全
+const getEmployee = async () => {
+    return trpc.employee.getEmployee.query();
+};
+```
