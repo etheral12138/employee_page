@@ -39,9 +39,9 @@ const employeeSchema = z.object({
 export const employeeRouter = router({
     // 获取员工信息
     getEmployee: publicProcedure
-        .query(() => {
+        .query(async () => {
             try {
-                const employee = localStore.getEmployee();
+                const employee = await localStore.getEmployee();
                 if (!employee) {
                     throw new Error('员工不存在');
                 }
@@ -55,9 +55,9 @@ export const employeeRouter = router({
     // 更新员工信息
     updateEmployee: publicProcedure
         .input(employeeSchema)
-        .mutation(({ input }) => {
+        .mutation(async ({ input }) => {
             try {
-                const result = localStore.updateEmployee(input);
+                const result = await localStore.updateEmployee(input);
                 return result;
             } catch (error) {
                 console.error('更新员工信息时出错:', error);

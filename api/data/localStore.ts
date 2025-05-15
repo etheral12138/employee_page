@@ -1,3 +1,7 @@
+import { db } from './db';
+import { employees, skills, projects } from './schema';
+import { eq } from 'drizzle-orm';
+
 // 员工数据类型
 export interface Employee {
     id: string;
@@ -31,70 +35,107 @@ export interface Employee {
     }>;
 }
 
-// 模拟员工数据
-const mockEmployeeData: Employee = {
-    id: "emp001",
-    name: "张三 (测试)",
-    title: "前端开发工程师",
-    department: "技术研发部",
-    email: "zhangsan@example.com",
-    phone: "13800138000",
-    bio: "我是一名充满激情的前端开发工程师，拥有丰富的Web开发经验，专注于构建可扩展和高性能的应用程序。我热爱学习新技术，并乐于在团队中分享知识。",
-    location: "上海",
-    timezone: "Asia/Shanghai",
-    lastUpdated: new Date().toLocaleString('zh-CN', {
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
-    }),
-    socialLinks: {
-        linkedin: "https://www.linkedin.com/in/泽群-刘-545874295",
-        github: "https://github.com/etheral12138",
-        twitter: "https://twitter.com/etheral12138",
-        personalWebsite: "https://blog.etheral.top",
-    },
-    skills: [
-        { id: "skill001", name: "TypeScript", level: "专家" },
-        { id: "skill002", name: "React", level: "高级" },
-        { id: "skill003", name: "Node.js", level: "高级" },
-        { id: "skill004", name: "Tailwind CSS", level: "中级" },
-        { id: "skill005", name: "Go", level: "初级" },
-    ],
-    projects: [
-        {
-            id: "proj001",
-            name: "企业级CRM系统",
-            description: "负责核心模块的设计与开发，提升了系统30%的性能。",
-            role: "技术负责人",
-            startDate: "2022-01-15",
-            endDate: "2023-06-30",
-        },
-        {
-            id: "proj002",
-            name: "电商平台重构",
-            description: "参与前端架构升级，引入React和TypeScript，优化用户体验。",
-            role: "前端工程师",
-            startDate: "2021-05-01",
-            endDate: "2021-12-20",
-        },
-    ],
-};
-
-// 内存中存储员工数据的映射
-const employeesStore: Map<string, Employee> = new Map();
-
-// 初始化数据
-employeesStore.set(mockEmployeeData.id, mockEmployeeData);
+// 默认员工ID
+const DEFAULT_EMPLOYEE_ID = "emp001";
 
 // 数据访问方法
 export const localStore = {
     // 获取员工信息
-    getEmployee: () => {
-        return employeesStore.get(mockEmployeeData.id);
+    getEmployee: async (): Promise<Employee | undefined> => {
+        try {
+            // 获取员工基本信息
+            const employeeData = await db.query.employees.findFirst({
+                where: eq(employees.id, DEFAULT_EMPLOYEE_ID),
+            });
+
+            if (!employeeData) return undefined;
+
+            // 获取员工技能
+            const skillsData = await db.query.skills.findMany({
+                where: eq(skills.employeeId, DEFAULT_EMPLOYEE_ID),
+            });
+
+            // 获取员工项目
+            const projectsData = await db.query.projects.findMany({
+                where: eq(projects.employeeId, DEFAULT_EMPLOYEE_ID),
+            });
+
+            // 组合完整的员工信息
+            return {
+                ...employeeData,
+                skills: skillsData.map(skill => ({
+                    id: skill.id,
+                    name: skill.name,
+                    level: skill.level,
+                })),
+                projects: projectsData.map(project => ({
+                    id: project.id,
+                    name: project.name,
+                    description: project.description,
+                    role: project.role,
+                    startDate: project.startDate,
+                    endDate: project.endDate,
+                })),
+            };
+        } catch (error) {
+            console.error('获取员工信息时出错:', error);
+            return undefined;
+        }
     },
+
     // 更新员工信息
-    updateEmployee: (employee: Employee)=> {
-        employeesStore.set(employee.id, employee);
-        return employee;
+    updateEmployee: async (employee: Employee): Promise<Employee> => {
+        try {
+            // 开始事务
+            // 更新员工基本信息
+            await db.update(employees)
+                .set({
+                    name: employee.name,
+                    title: employee.title,
+                    department: employee.department,
+                    email: employee.email,
+                    phone: employee.phone,
+                    bio: employee.bio,
+                    location: employee.location,
+                    timezone: employee.timezone,
+                    lastUpdated: employee.lastUpdated,
+                    socialLinks: employee.socialLinks,
+                })
+                .where(eq(employees.id, employee.id));
+
+            // 删除现有技能，然后重新插入
+            await db.delete(skills).where(eq(skills.employeeId, employee.id));
+            if (employee.skills.length > 0) {
+                await db.insert(skills).values(
+                    employee.skills.map(skill => ({
+                        id: skill.id,
+                        name: skill.name,
+                        level: skill.level,
+                        employeeId: employee.id,
+                    }))
+                );
+            }
+
+            // 删除现有项目，然后重新插入
+            await db.delete(projects).where(eq(projects.employeeId, employee.id));
+            if (employee.projects.length > 0) {
+                await db.insert(projects).values(
+                    employee.projects.map(project => ({
+                        id: project.id,
+                        name: project.name,
+                        description: project.description,
+                        role: project.role,
+                        startDate: project.startDate,
+                        endDate: project.endDate,
+                        employeeId: employee.id,
+                    }))
+                );
+            }
+
+            return employee;
+        } catch (error) {
+            console.error('更新员工信息时出错:', error);
+            throw new Error('更新员工信息失败');
+        }
     },
 };
