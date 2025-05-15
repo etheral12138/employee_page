@@ -13,7 +13,8 @@ const app = new Hono();
 
 app.use("*", logger());
 
-app.use("/trpc/*", trpcServer({
+app.use("/api/trpc/*", trpcServer({
+    endpoint: '/api/trpc',
     router: appRouter,
 })
 )

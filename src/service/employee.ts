@@ -1,15 +1,19 @@
-import { createTRPCClient,httpBatchLink } from '@trpc/client';
+import { httpLink } from '@trpc/client';
 import type { AppRouter } from '@api/routes/_app';
 import { Employee } from '@/types/employee';
+import { createTRPCNext } from '@trpc/next';
 
 // 创建tRPC客户端
-// 使用 createTRPCClient 替代已弃用的 createTRPCProxyClient
-const trpc = createTRPCClient<AppRouter>({
-    links: [
-        httpBatchLink({
-            url: '/trpc',
-        }),
-    ],
+export const trpc = createTRPCNext<AppRouter>({
+    config() {
+        return {
+            links: [
+                httpLink({
+                    url: '/api/trpc',
+                }),
+            ],
+        };
+    },
 });
 
 // 获取员工信息
