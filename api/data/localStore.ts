@@ -9,7 +9,7 @@ export interface Employee {
     bio: string;
     location: string;
     timezone: string;
-    lastUpdated: Date;
+    lastUpdated: string;
     socialLinks: {
         linkedin?: string;
         github?: string;
@@ -42,7 +42,11 @@ const mockEmployeeData: Employee = {
     bio: "我是一名充满激情的前端开发工程师，拥有丰富的Web开发经验，专注于构建可扩展和高性能的应用程序。我热爱学习新技术，并乐于在团队中分享知识。",
     location: "上海",
     timezone: "Asia/Shanghai",
-    lastUpdated: new Date(),
+    lastUpdated: new Date().toLocaleString('zh-CN', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+    }),
     socialLinks: {
         linkedin: "https://www.linkedin.com/in/泽群-刘-545874295",
         github: "https://github.com/etheral12138",

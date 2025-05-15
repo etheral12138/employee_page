@@ -129,7 +129,12 @@ const EmployeeProfileEdit: React.FC<EmployeeProfileEditProps> = ({ employee, onS
   // 提交表单
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const updatedEmployee = { ...formData, lastUpdated: new Date() };
+    const updatedEmployee = {
+      ...formData, lastUpdated: new Date().toLocaleString('zh-CN', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+      })};
     onSave(updatedEmployee);
   };
 

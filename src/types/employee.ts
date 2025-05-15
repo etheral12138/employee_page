@@ -30,7 +30,7 @@ export interface Employee {
   bio: string;
   location: string;
   timezone: string;
-  lastUpdated: Date;
+  lastUpdated: string;
   socialLinks: SocialLinks;
   skills: Skill[];
   projects: Project[];
