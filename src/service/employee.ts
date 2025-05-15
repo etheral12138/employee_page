@@ -7,7 +7,7 @@ import { Employee } from '@/types/employee';
 const trpc = createTRPCClient<AppRouter>({
     links: [
         httpBatchLink({
-            url: '/api/trpc',
+            url: '/trpc',
         }),
     ],
 });
